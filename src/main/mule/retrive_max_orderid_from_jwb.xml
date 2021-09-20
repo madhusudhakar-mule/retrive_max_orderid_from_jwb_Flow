@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="02f3b1f3-b825-4aad-ad91-9c90bd9c596a" >
+		<http:listener-connection host="0.0.0.0" port="8089" />
+	</http:listener-config>
+	<flow name="retrive_max_orderid_from_jwbFlow" doc:id="9a350f4e-09d6-4490-9199-3c3891647aa1" >
+		<http:listener doc:name="Listener" doc:id="69db7a30-0d3f-47f2-a83c-fd74b1bb3f64" config-ref="HTTP_Listener_config" path="/max"/>
+		<logger level="INFO" doc:name="Start_Log" doc:id="c0ab136e-947e-412b-97fd-745e99a054ba" message="===========start=============="/>
+		<ee:transform doc:name="Retrive_Max_orderId" doc:id="d51af88b-1f0c-4181-849e-24354e23b8ee" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var orderlist= [{
+"orderId" : "1115",
+"Market" : "US",
+"Brand" : "OC"
+},
+{
+"orderId" : "1115",
+"Market" : "UK",
+"Brand" : "RC"
+},
+{
+"orderId" : "1115",
+"Market" : "FR",
+"Brand" : "JWB"
+},
+{
+"orderId" : "1114",
+"Market" : "FR",
+"Brand" : "JWB"
+},
+{
+"orderId" : "1113",
+"Market" : "FZ",
+"Brand" : "JWB"
+}
+]
+
+---
+orderlist filter ($.Brand == "JWB" and $.orderId >1114) map(order,indexOfOrder)->{
+	"orderId": order.orderId,
+	"Market": order.Market,
+	"Brand": order.Brand
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End_Log" doc:id="92748e7c-d516-43ab-967a-e44b198bb611" />
+		<logger level="INFO" doc:name="payload_Log" doc:id="2b249bd0-3d18-44da-993b-ee51b4090160" message="#[payload]"/>
+	</flow>
+</mule>
